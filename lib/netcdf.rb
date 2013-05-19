@@ -7,4 +7,6 @@ module NetCDF
   # The numbers in the array are the major, minor, and patch versions,
   # respectively.
   VERSION = [0, 1, 0]
+
+  require 'netcdf/netcdf'
 end
