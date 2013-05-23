@@ -5,16 +5,6 @@ require 'ffi/netcdf'
 include LibNetCDF
 
 module NetCDF
-  # Convert an error code into an error message.
-  #
-  # * *Args*    :
-  #   - +error+ -> an error code returned from a call to a netCDF function. 
-  # * *Returns* :
-  #   - an error message corresponding to the error code.
-  def self.strerror(error)
-    nc_strerror(error)
-  end
-
   # Return the version number, as an array, of the NetCDF C library used.
   #
   # The numbers in the array are the major, minor, and patch versions,
@@ -28,5 +18,17 @@ module NetCDF
 
   # An exception class to wrap the NetCDF errors.
   class NetCDFError < StandardError
+  end
+
+  private
+
+  # Convert an error code into an error message.
+  #
+  # * *Args*    :
+  #   - +error+ -> an error code returned from a call to a netCDF function.
+  # * *Returns* :
+  #   - an error message corresponding to the error code.
+  def self.strerror(error)
+    nc_strerror(error)
   end
 end
