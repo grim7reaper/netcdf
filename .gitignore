@@ -1,2 +1,4 @@
 # Ignore Vim's temporary files.
 *.swp
+# Ignore documentation directory.
+doc/
