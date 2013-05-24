@@ -71,9 +71,17 @@ module NetCDF
     #
     #              Default format is *NETCDF3*.
     # * *Raises* :
-    #   - +ArgumentError+ -> if the mode or the format is invalid.
-    #   - +NetCDFError+   -> if an error occurs when creating a new dataset (or
-    #     during opening an existing one).
+    #   - +ArgumentError+ -> possible causes include:
+    #     - invalid mode.
+    #     - invalid format.
+    #   - +NetCDFError+ -> possible causes:
+    #     - the NetCDF file does not exist (read-only mode or update mode).
+    #     - passing a file path that includes a non-existing directory (write
+    #     mode)
+    #     - the NetCDF file already exists and you set clobber to *false* (write
+    #     mode)
+    #     - try to create a netCDF file in a directory where you don't have
+    #     permission (write mode).
     def initialize(filepath, opts={})
       # Retrieve the optional arguments.
       defaults = { mode:'r', clobber:true, share:false, format: 'NETCDF3' }
@@ -84,21 +92,90 @@ module NetCDF
       # Open the NetCDF file.
       if opts[:mode] == 'w'
         err = nc_create(filepath, cmode, id_ptr)
+        @in_define_mode = true
       else
         err = nc_open(filepath, cmode, id_ptr)
+        @in_define_mode = false
       end
       fail NetCDFError.new(nc_strerror(err)) unless err == NC_NOERR
       # Retrieve the netCDF ID.
       @id = id_ptr.read_int
     end
 
+    # Enter into the define mode.
+    #
+    # That means that dimensions, variables, and attributes can be added or
+    # renamed and attributes can be deleted.
+    #
+    # For *NETCDF4* format, it is not necessary to call this function, this is
+    # done automatically, as needed.
+    #
+    # * *Raises* :
+    #   - +NetCDFError+ -> possible causes:
+    #     - the dataset was opened in read-only mode.
+    #     - the dataset is already in define mode.
+    #     - the dataset is closed.
+    def define_mode
+      err = nc_redef(@id)
+      fail NetCDFError.new(nc_strerror(err)) unless err == NC_NOERR
+      @in_define_mode = true
+    end
+
+    # Enter into the data mode.
+    #
+    # That means that variable data can be read or written.
+    #
+    # This call may involve copying data under some circumstances (and thus,
+    # performance penalty). Read
+    # {this section}[http://www.unidata.ucar.edu/software/netcdf/docs/netcdf/Parts-of-a-NetCDF-Classic-File.html#Parts-of-a-NetCDF-Classic-File]
+    # of the documentation to understand why and how to avoid it.
+    #
+    # For *NETCDF4* format, it is not necessary to call this function, this is
+    # done automatically, as needed.
+    #
+    # * *Raises* :
+    #   - +NetCDFError+ -> possible causes include:
+    #     - the dataset is closed.
+    #     - the dataset is already in data mode.
+    #     - at least one variable size constraint is exceeded for the file
+    #     format in use (more information about the constraints
+    #     here[http://www.unidata.ucar.edu/software/netcdf/docs/netcdf/Large-File-Support.html#Large-File-Support]).
+    def data_mode
+      err = nc_enddef(@id)
+      fail NetCDFError.new(nc_strerror(err)) unless err == NC_NOERR
+      @in_define_mode = false
+    end
+
     # Close the dataset.
     #
     # * *Raises* :
-    #   - +NetCDFError+ -> if an error occurs.
+    #   - +NetCDFError+ -> possible causes include:
+    #     - the dataset is already closed.
+    #     - the dataset was in define mode and the automatic call to data_mode
+    #     failed.
     def close
       err = nc_close(@id)
       fail NetCDFError.new(nc_strerror(err)) unless err == NC_NOERR
+    end
+
+    # Write all buffered data in the dataset to the disk.
+    #
+    # * *Raises* :
+    #   - +NetCDFError+ -> possible causes include:
+    #     - the dataset is already closed.
+    #     - dataset is in define mode.
+    def sync
+      err = nc_sync(@id)
+      fail NetCDFError.new(nc_strerror(err)) unless err == NC_NOERR
+    end
+
+
+    # Test if the file is in define mode.
+    #
+    # * *Returns* :
+    #   - true if the file is in define mode, false if it is in data mode.
+    def define_mode?
+      @in_define_mode
     end
 
     attr_reader :id
@@ -112,7 +189,9 @@ module NetCDF
     # * *Returns* :
     #   - the flag.
     # * *Raises* :
-    #   - +ArgumentError+ -> if the mode or the format is invalid.
+    #   - +ArgumentError+ -> possible causes include:
+    #     - invalid mode.
+    #     - invalid format.
     def opts_to_flag(opts)
       # Validity checks.
       unless SUPPORTED_MODE.include? opts[:mode]
@@ -131,7 +210,7 @@ module NetCDF
       # Flag setting.
       flag = 0
       flag |= NC_SHARE         if opts[:share]
-      flag |= NC_WRITE         if opts[:mode] == 'w' || opts['mode'] == 'r+'
+      flag |= NC_WRITE         if opts[:mode] == 'w' || opts[:mode] == 'r+'
       flag |= NC_NOWRITE       if opts[:mode] == 'r'
       flag |= NC_64BIT_OFFSET  if opts[:format] == 'NETCDF3_64BIT'
       flag |= NC_CLASSIC_MODEL if opts[:format] == 'NETCDF4_CLASSIC'

@@ -21,6 +21,8 @@ module LibNetCDF #:nodoc:
 
   attach_function :nc_create, [ :string, :int, :pointer ], :int
   attach_function :nc_open  , [ :string, :int, :pointer ], :int
-  attach_function :nc_sync  , [ :int ], :int
+  attach_function :nc_redef , [ :int ], :int
+  attach_function :nc_enddef, [ :int ], :int
   attach_function :nc_close , [ :int ], :int
+  attach_function :nc_sync  , [ :int ], :int
 end
