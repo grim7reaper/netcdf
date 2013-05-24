@@ -16,15 +16,18 @@ Gem::Specification.new do |spec|
   spec.homepage    = ''
   spec.description = <<-eos
                      A Ruby interface to the NetCDF library.
-                     It is built on the NMatrix library and uses Ruby FFI.
+                     It is built on the NMatrix library and uses Ruby-FFI.
                      eos
-  spec.authors     = ['Sylvain Laperche']
-  spec.email       = 'sylvain.laperche@gmx.fr'
-  spec.files       = Dir['lib/**/*.rb']
+  spec.authors       = ['Sylvain Laperche']
+  spec.email         = 'sylvain.laperche@gmx.fr'
+  spec.require_paths = [ 'lib' ]
+  spec.files         = `git ls-files`.split("\n") - [ '.gitignore', __FILE__ ]
+  spec.test_files    = [ 'test/ts_NetCDF.rb' ]
 
-  spec.add_dependency 'nmatrix', '0.0.3'
-  spec.add_dependency 'ffi'    , '~> 1.0'
+  spec.extra_rdoc_files = ['README.rdoc', 'LICENSE']
+  spec.rdoc_options     = [ 'lib', '-t', 'NetCDF', '-m', 'README.rdoc' ]
 
+  spec.add_dependency  'nmatrix', '0.0.3'
+  spec.add_dependency  'ffi'    , '~> 1.0'
   spec.requirements << 'libnetcdf'
-  spec.rdoc_options << '--title' << 'NetCDF'
 end
