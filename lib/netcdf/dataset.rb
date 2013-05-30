@@ -1,6 +1,6 @@
 #encoding: utf-8
 
-require 'ffi/dataset'
+require 'ffi/netcdf'
 
 include LibNetCDF
 
