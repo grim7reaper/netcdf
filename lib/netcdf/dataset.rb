@@ -1,6 +1,10 @@
 #encoding: utf-8
 
+require 'set'
+
 require 'ffi/netcdf'
+require 'ffi/read_size_t'
+require 'netcdf/dimension'
 
 include LibNetCDF
 
@@ -86,6 +90,7 @@ module NetCDF
       # Retrieve the optional arguments.
       defaults = { mode:'r', clobber:true, share:false, format: 'NETCDF3' }
       opts = defaults.merge(opts)
+      @format = opts[:format]
       # Prepare the input parameters.
       cmode = opts_to_flag(opts)
       id_ptr = FFI::MemoryPointer.new(:int)
@@ -93,6 +98,7 @@ module NetCDF
       if opts[:mode] == 'w'
         err = nc_create(filepath, cmode, id_ptr)
         @in_define_mode = true
+        @dimensions = {}
       else
         err = nc_open(filepath, cmode, id_ptr)
         @in_define_mode = false
@@ -100,6 +106,10 @@ module NetCDF
       fail NetCDFError.new(nc_strerror(err)) unless err == NC_NOERR
       # Retrieve the netCDF ID.
       @id = id_ptr.read_int
+      # Load NetCDF structure.
+      unless opts[:mode] == 'w'
+        @dimensions = load_dimensions()
+      end
     end
 
     # Enter into the define mode.
@@ -179,6 +189,8 @@ module NetCDF
     end
 
     attr_reader :id
+    attr_reader :format
+    attr_reader :dimensions
 
     private
 
@@ -218,6 +230,52 @@ module NetCDF
       flag |= opts[:clobber] ? NC_CLOBBER : NC_NOCLOBBER
 
       return flag
+    end
+
+    # Load the existing dimensions from the opened dataset.
+    #
+    # * *Returns* :
+    #   - the dimensions, indexed by name.
+    def load_dimensions
+      dimensions = {}
+      # Retrieve the total number of dimensions.
+      nb_dim_ptr = FFI::MemoryPointer.new(:int)
+      err = LibNetCDF.nc_inq_ndims(@id, nb_dim_ptr)
+      fail NetCDFError.new(nc_strerror(err)) unless err == NC_NOERR
+      # Retrieve the IDs of the unlimited dimensions.
+      unlim_ids = fetch_unlimdims_ids()
+      # Load each dimension.
+      nb_dim_ptr.read_int.times do |dim_id|
+        dim = Dimension.load_dimension(@id, dim_id, unlim_ids.include?(dim_id))
+        dimensions[dim.name] = dim
+      end
+
+      return dimensions
+    end
+
+    # Retrieve the IDs of the unlimited dimensions.
+    #
+    # * *Returns* :
+    #   - IDs of the unlimited dimensions.
+    def fetch_unlimdims_ids
+      if @format == 'NETCDF4' # Can have many unlimited dimensions.
+        # Retrieve the number of unlimited dimensions.
+        nb_udim_ptr = FFI::MemoryPointer.new(:int)
+        err = LibNetCDF.nc_inq_unlimdims(@id, nb_udim_ptr, nil)
+        fail NetCDFError.new(nc_strerror(err)) unless err == NC_NOERR
+        nb_udim = nb_udim_ptr.read_int
+        # Retrieve the IDs of the unlimited dimensions.
+        udim_id = FFI::MemoryPointer.new(:int, nb_udim)
+        err = LibNetCDF.nc_inq_unlimdims(@id, nil, udim_id)
+        fail NetCDFError.new(nc_strerror(err)) unless err == NC_NOERR
+        return Set.new(udim_id.get_array_of_int(0, nb_udim))
+      else # Only one unlimited dimension ("nc_inq_unlimdims" not available)
+        id_ptr = FFI::MemoryPointer.new(:int)
+        err = LibNetCDF.nc_inq_unlimdim(@id, id_ptr)
+        fail NetCDFError.new(nc_strerror(err)) unless err == NC_NOERR
+        id = id_ptr.read_int
+        return Set.new(id == -1 ? [] : [id])
+      end
     end
   end
 end

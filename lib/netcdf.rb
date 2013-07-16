@@ -10,4 +10,5 @@ module NetCDF
 
   require 'netcdf/netcdf'
   require 'netcdf/dataset'
+  require 'netcdf/dimension'
 end

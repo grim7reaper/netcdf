@@ -27,7 +27,7 @@ Gem::Specification.new do |spec|
   spec.extra_rdoc_files = ['README.rdoc', 'LICENSE']
   spec.rdoc_options     = [ 'lib', '-t', 'NetCDF', '-m', 'README.rdoc' ]
 
-  spec.add_dependency  'nmatrix', '0.0.3'
+  spec.add_dependency  'nmatrix', '0.0.4'
   spec.add_dependency  'ffi'    , '~> 1.0'
   spec.requirements << 'libnetcdf'
 end
