@@ -1,3 +1,9 @@
+#encoding: utf-8
+
+# Copyright (c) 2013-2014, Sylvain LAPERCHE
+# All rights reserved.
+# License: BSD 3-Clause (http://opensource.org/licenses/BSD-3-Clause)
+
 # FFI::Pointer does not provide a read_size_t methods, but I need it.
 # The following code is an hack that provides a portable (I hope) implemention
 # of the read_size_t method.

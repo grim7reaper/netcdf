@@ -12,7 +12,7 @@ Gem::Specification.new do |spec|
   spec.version     = VERSION
   spec.date        = Time.now.strftime("%F")
   spec.summary     = 'A Ruby interface to the NetCDF library'
-  spec.license     = 'BSD2'
+  spec.license     = 'BSD3'
   spec.homepage    = ''
   spec.description = <<-eos
                      A Ruby interface to the NetCDF library.
