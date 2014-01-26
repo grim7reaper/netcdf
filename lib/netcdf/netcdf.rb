@@ -14,8 +14,7 @@ module NetCDF
   # The numbers in the array are the major, minor, and patch versions,
   # respectively.
   #
-  # * *Returns* :
-  #   - the version number, as an array, of the NetCDF C library used.
+  # @return [Array<Fixnum>] the version number of the NetCDF C library used.
   def self.c_version
     nc_inq_libvers.split.first.split('.').map(&:to_i)
   end
@@ -28,10 +27,9 @@ module NetCDF
 
   # Convert an error code into an error message.
   #
-  # * *Args*    :
-  #   - +error+ -> an error code returned from a call to a netCDF function.
-  # * *Returns* :
-  #   - an error message corresponding to the error code.
+  # @param error [Fixnum] an error code returned from a call to a netCDF
+  #                       function.
+  # @return [String] an error message corresponding to the error code.
   def self.strerror(error)
     nc_strerror(error)
   end

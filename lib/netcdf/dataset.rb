@@ -26,37 +26,30 @@ module NetCDF
 
     # Create a new Dataset (or open an existing one).
     #
-    # * *Args*    :
-    #   - +filepath+ -> NetCDF file path.
-    #   - +opts+     -> optional arguments.
-    #     [mode] access mode:
+    # @param filepath [String] NetCDF file path.
+    # @param opts [Hash] optional arguments.
+    # @option opts [String] :mode ('r') access mode:
     #            - _r_ means read-only.
     #            - _w_ means write (a new file is created, an existing file with
     #              the same name is deleted).
     #            - _r+_ means update (opened for reading and writing).
+    # @option opts [Boolean] :clobber (true) clobber mode.
     #
-    #            Default mode is _r_.
-    #     [clobber] If *true*, opening a file with mode='w' will clobber
-    #               (overwrite) an existing file with the same name.
+    #   If *true*, opening a file with mode='w' will clobber (overwrite) an
+    #   existing file with the same name.
     #
-    #               If *false*, a NetCDFError will be raised if a file with the
-    #               same name already exists.
+    #   If *false*, a NetCDFError will be raised if a file with the same name
+    #   already exists.
+    # @option opts [Boolean] :share (false) shared mode.
     #
-    #               Default value is *true*.
-    #     [share] shared mode.
+    #    Appropriate when one process may be writing the dataset and one or more
+    #    other processes reading the dataset concurrently.
     #
-    #             Appropriate when one process may be writing the dataset and
-    #             one or more other processes reading the dataset concurrently.
-    #
-    #             It means that dataset accesses are not buffered and caching is
-    #             limited.
-    #
-    #             Since the buffering scheme is optimized for sequential access,
-    #             programs that do not access data sequentially may see some
-    #             performance improvement.
-    #
-    #             Default value is *false*.
-    #     [format] underlying file format:
+    #    It means that dataset accesses are not buffered and caching is limited.
+    #    Since the buffering scheme is optimized for sequential access, programs
+    #    that do not access data sequentially may see some performance
+    #    improvement.
+    # @option opts [String] :format ('NETCDF3') underlying file format:
     #              - *NETCDF3* classic netCDF 3 file format. Files
     #                larger than 2 GiB can be created, with certain
     #                limitations (see {Classic Limitations}[https://www.unidata.ucar.edu/software/netcdf/docs/netcdf/Classic-Limitations.html#Classic-Limitations]).
@@ -76,20 +69,17 @@ module NetCDF
     #
     #              More information about each format
     #              here[https://www.unidata.ucar.edu/software/netcdf/docs/netcdf/Which-Format.html#Which-Format].
-    #
-    #              Default format is *NETCDF3*.
-    # * *Raises* :
-    #   - +ArgumentError+ -> possible causes include:
+    # @raise [ArgumentError] possible causes include:
     #     - invalid mode.
     #     - invalid format.
-    #   - +NetCDFError+ -> possible causes:
+    # @raise [NetCDFError] possible causes:
     #     - the NetCDF file does not exist (read-only mode or update mode).
     #     - passing a file path that includes a non-existing directory (write
-    #     mode)
+    #       mode)
     #     - the NetCDF file already exists and you set clobber to *false* (write
-    #     mode)
+    #       mode)
     #     - try to create a netCDF file in a directory where you don't have
-    #     permission (write mode).
+    #       permission (write mode).
     def initialize(filepath, opts={})
       # Retrieve the optional arguments.
       defaults = { mode:'r', clobber:true, share:false, format: 'NETCDF3' }
@@ -124,8 +114,7 @@ module NetCDF
     # For *NETCDF4* format, it is not necessary to call this function, this is
     # done automatically, as needed.
     #
-    # * *Raises* :
-    #   - +NetCDFError+ -> possible causes:
+    # @raise [NetCDFError] possible causes:
     #     - the dataset was opened in read-only mode.
     #     - the dataset is already in define mode.
     #     - the dataset is closed.
@@ -147,13 +136,12 @@ module NetCDF
     # For *NETCDF4* format, it is not necessary to call this function, this is
     # done automatically, as needed.
     #
-    # * *Raises* :
-    #   - +NetCDFError+ -> possible causes include:
+    # @raise [NetCDFError] possible causes include:
     #     - the dataset is closed.
     #     - the dataset is already in data mode.
     #     - at least one variable size constraint is exceeded for the file
-    #     format in use (more information about the constraints
-    #     here[http://www.unidata.ucar.edu/software/netcdf/docs/netcdf/Large-File-Support.html#Large-File-Support]).
+    #       format in use (more information about the constraints
+    #       here[http://www.unidata.ucar.edu/software/netcdf/docs/netcdf/Large-File-Support.html#Large-File-Support]).
     def data_mode
       err = nc_enddef(@id)
       fail NetCDFError.new(nc_strerror(err)) unless err == NC_NOERR
@@ -162,11 +150,10 @@ module NetCDF
 
     # Close the dataset.
     #
-    # * *Raises* :
-    #   - +NetCDFError+ -> possible causes include:
+    # @raise [NetCDFError] possible causes include:
     #     - the dataset is already closed.
     #     - the dataset was in define mode and the automatic call to data_mode
-    #     failed.
+    #       failed.
     def close
       err = nc_close(@id)
       fail NetCDFError.new(nc_strerror(err)) unless err == NC_NOERR
@@ -174,8 +161,7 @@ module NetCDF
 
     # Write all buffered data in the dataset to the disk.
     #
-    # * *Raises* :
-    #   - +NetCDFError+ -> possible causes include:
+    # @raise [NetCDFError] possible causes include:
     #     - the dataset is already closed.
     #     - dataset is in define mode.
     def sync
@@ -186,26 +172,32 @@ module NetCDF
 
     # Test if the file is in define mode.
     #
-    # * *Returns* :
-    #   - true if the file is in define mode, false if it is in data mode.
+    # @return [Boolean] true if the file is in define mode, false if it is in
+    # data mode.
     def define_mode?
       @in_define_mode
     end
 
+    # @!attribute [r] id
+    #   @return [Fixnum] the dataset ID.
     attr_reader :id
+
+    # @!attribute [r] format
+    #   @return [String] the underlying file format.
     attr_reader :format
+
+    # @!attribute [r] dimensions
+    #   @return [Hash<String, Dimension>] the dimensions of the dataset, indexed
+    #                                     by name.
     attr_reader :dimensions
 
     private
 
     # Convert the optional arguments into flag for C function.
     #
-    # * *Args*    :
-    #   - +opts+ -> optional arguments.
-    # * *Returns* :
-    #   - the flag.
-    # * *Raises* :
-    #   - +ArgumentError+ -> possible causes include:
+    # @param opts [Hash] optional arguments.
+    # @return [Fixnum] the flag.
+    # @raise [ArgumentError] possible causes include:
     #     - invalid mode.
     #     - invalid format.
     def opts_to_flag(opts)
@@ -238,8 +230,7 @@ module NetCDF
 
     # Load the existing dimensions from the opened dataset.
     #
-    # * *Returns* :
-    #   - the dimensions, indexed by name.
+    # @return [Hash<String, Dimension>] the dimensions, indexed by name.
     def load_dimensions
       dimensions = {}
       # Retrieve the total number of dimensions.
@@ -259,8 +250,7 @@ module NetCDF
 
     # Retrieve the IDs of the unlimited dimensions.
     #
-    # * *Returns* :
-    #   - IDs of the unlimited dimensions.
+    # @return [Set<Fixnum>] IDs of the unlimited dimensions.
     def fetch_unlimdims_ids
       if @format == 'NETCDF4' # Can have many unlimited dimensions.
         # Retrieve the number of unlimited dimensions.

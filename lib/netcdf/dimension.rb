@@ -18,18 +18,15 @@ module NetCDF
   class Dimension
     # Load an existing dimension.
     #
-    # This method is not intented to be called explicitly.
-    #
-    # * *Args*    :
-    #   - +owner+  -> NetCDF id or group ID.
-    #   - +dim_id+ -> dimension ID.
-    #   - +unlimited?+ -> the dimension is unlimited?
-    # * *Returns* :
-    #   - the dimension identified by `dimid`.
-    # * *Raises* :
-    #   - +NetCDFError+ -> possible causes:
+    # @param owner     [Fixnum] NetCDF id or group ID.
+    # @param dim_id    [Fixnum] dimension ID.
+    # @param unlimited [Boolean] the dimension is unlimited?
+    # @return [Dimension] the dimension identified by `dimid`.
+    # @raise [NetCDFError] possible causes:
     #     - the owner is closed.
     #     - the dimension ID is invalid.
+    #
+    # @note This method is not intented to be called explicitly.
     def self.load_dimension(owner, dim_id, unlimited)
       # Retrieves the name (the array should have a size of NC_MAX_NAME+1).
       # +1 to include the null byte (Cf. doc of the C API).
@@ -48,23 +45,20 @@ module NetCDF
 
     # Creates a new dimension.
     #
-    # This method is not intented to be called explicitly.
-    #
-    # * *Args*    :
-    #   - +owner+ -> NetCDF id or group ID.
-    #   - +name+  -> dimension name.
-    #   - +size+  -> dimension size (optional arguments).
-    #                This should be a positive integer or 0 (unlimited
-    #                dimension).
-    #                Default size is 0 (unlimited).
-    # * *Raises* :
-    #   - +NetCDFError+ -> possible causes:
+    # @param owner [Fixnum] NetCDF id or group ID.
+    # @param name  [String] dimension name.
+    # @param size  [Fixnum] dimension size.
+    #                       This should be a positive integer or 0 (unlimited
+    #                       dimension).
+    # @raise [NetCDFError] possible causes:
     #     - the owner is closed.
     #     - the owner is not in define mode.
     #     - the dimension name is already used.
     #     - the length is negative.
     #     - the dimension is unlimited, but there is already one unlimited
-    #     dimension (NetCDF-3 only)
+    #       dimension (NetCDF-3 only)
+    #
+    # @note This method is not intented to be called explicitly.
     def self.create_dimension(owner, name, size = 0)
       if size == 0
         size = NC_UNLIMITED
@@ -84,15 +78,14 @@ module NetCDF
 
     # Initializes a new Dimension.
     #
-    # <b>Dimension must be created using the create_dim method</b> of a Group or
-    # Dataset instance, not using this class directly.
+    # @param owner     [Fixnum] NetCDF id or group ID.
+    # @param dim_id    [Fixnum] dimension ID.
+    # @param name      [String] dimension name.
+    # @param size      [Fixnum] dimension size.
+    # @param unlimited [Boolean] the dimension is unlimited?
     #
-    # * *Args*    :
-    #   - +owner+  -> NetCDF id or group ID.
-    #   - +dim_id+ -> dimension ID.
-    #   - +name+   -> dimension name.
-    #   - +size+   -> dimension size.
-    #   - +unlimited+ -> the dimension is unlimited?
+    # @note Dimension must be created using the create_dim method of a Group or
+    #       Dataset instance, not using this class directly.
     def initialize(owner, dim_id, name, size, unlimited)
       @owner = owner
       @id    = dim_id
@@ -101,10 +94,9 @@ module NetCDF
       @unlimited = unlimited
     end
 
-    # Return *true* if the dimension is unlimited, otherwise *false*.
+    # Return true if the dimension is unlimited, otherwise false.
     #
-    # * *Returns* :
-    #   - *true* if the dimension is unlimited, otherwise *false*.
+    # @return [Boolean] true if the dimension is unlimited, otherwise false.
     def unlimited?
       @unlimited
     end
@@ -113,10 +105,8 @@ module NetCDF
     #
     # For the unlimited dimension, this is the number of records written so far.
     #
-    # * *Returns* :
-    #   - the length of dimension.
-    # * *Raises* :
-    #   - +NetCDFError+ -> possible causes:
+    # @return [Fixnum] the length of dimension.
+    # @raise [NetCDFError] possible causes:
     #     - the dataset is closed.
     def length
       # An unlimited dimension can grow as needed, so we have to make a call to
@@ -131,8 +121,16 @@ module NetCDF
     end
     alias_method :size, :length
 
+    # @!attribute [r] owner
+    #   @return [Fixnum] the owner ID.
     attr_reader :owner
+
+    # @!attribute [r] id
+    #   @return [Fixnum] the dimension ID.
     attr_reader :id
+
+    # @!attribute [r] name
+    #   @return [String] the dimension name.
     attr_reader :name
   end
 end

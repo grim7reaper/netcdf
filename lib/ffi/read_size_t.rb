@@ -8,7 +8,9 @@
 # The following code is an hack that provides a portable (I hope) implemention
 # of the read_size_t method.
 # Adapted from https://github.com/ffi/ffi/issues/118
+# @api private
 module FFI
+  # @see http://rubydoc.info/github/ffi/ffi/FFI/Pointer FFI::Pointer Documentation
   class Pointer
     builtin_type = FFI::TypeDefs[:size_t]
     typename, _ = FFI::TypeDefs.find do |(name, type)|
