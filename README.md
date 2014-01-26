@@ -12,11 +12,11 @@ and calling those functions from Ruby code. A Ruby-FFI extension works without
 changes on Ruby and JRuby.
 
 
-## What is the NetCDF?
+## What is NetCDF?
 
-The NetCDF is a binary file format used to store data in machine-independent
-way. A NetCDF file contains metadata, which can be units and description of data
-for example, that make the data self-describing.
+NetCDF is a binary file format used to store data in machine-independent way. A
+NetCDF file contains metadata, which can be units and description of data for
+example, that make the data self-describing.
 
 It is very convenient to store spatialized data (like geographic data, maps can
 be displayed with an external tool like Panoply), thus it is widely used in
