@@ -15,7 +15,7 @@ Gem::Specification.new do |spec|
   spec.email       = 'sylvain.laperche@gmail.com'
   spec.summary     = 'A Ruby interface to the NetCDF library'
   spec.license     = 'BSD3'
-  spec.homepage    = ''
+  spec.homepage    = 'http://projects.gw-computing.net/projects/netcdf'
   spec.description = <<-eos
                      A Ruby interface to the NetCDF library.
                      It is built on the NMatrix library and uses Ruby-FFI.
