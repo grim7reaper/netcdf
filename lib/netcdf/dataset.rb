@@ -175,7 +175,7 @@ module NetCDF
     # @return [Boolean] true if the file is in define mode, false if it is in
     # data mode.
     def define_mode?
-      @in_define_mode
+      return @in_define_mode
     end
 
     # @!attribute [r] id

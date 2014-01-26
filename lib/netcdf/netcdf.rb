@@ -16,7 +16,7 @@ module NetCDF
   #
   # @return [Array<Fixnum>] the version number of the NetCDF C library used.
   def self.c_version
-    nc_inq_libvers.split.first.split('.').map(&:to_i)
+    return nc_inq_libvers.split.first.split('.').map(&:to_i)
   end
 
   # An exception class to wrap the NetCDF errors.
@@ -31,6 +31,6 @@ module NetCDF
   #                       function.
   # @return [String] an error message corresponding to the error code.
   def self.strerror(error)
-    nc_strerror(error)
+    return nc_strerror(error)
   end
 end

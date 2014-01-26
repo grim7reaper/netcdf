@@ -98,7 +98,7 @@ module NetCDF
     #
     # @return [Boolean] true if the dimension is unlimited, otherwise false.
     def unlimited?
-      @unlimited
+      return @unlimited
     end
 
     # Return the length of dimension.
@@ -117,7 +117,7 @@ module NetCDF
         fail NetCDFError.new(nc_strerror(err)) unless err == NC_NOERR
         @size = size_ptr.read_size_t
       end
-      @size
+      return @size
     end
     alias_method :size, :length
 
